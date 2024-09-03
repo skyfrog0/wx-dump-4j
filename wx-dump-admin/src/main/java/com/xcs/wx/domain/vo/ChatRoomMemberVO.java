@@ -52,7 +52,7 @@ public class ChatRoomMemberVO {
     /**
      * 备注
      */
-    @ColumnWidth(25)
+    @ColumnWidth(6)
     @ExcelProperty("状态")
     private Integer state;
 

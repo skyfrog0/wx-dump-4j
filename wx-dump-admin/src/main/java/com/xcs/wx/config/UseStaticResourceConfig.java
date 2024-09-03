@@ -23,9 +23,12 @@ public class UseStaticResourceConfig implements WebMvcConfigurer {
     }
 
     // 默认返回json格式
-    @Override
+    /*@Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        //调用父类的配置
+        WebMvcConfigurer.super.configureMessageConverters(converters);
+        //创建FastJson的消息转换器
         converters.add(new MappingJackson2HttpMessageConverter());
-    }
+    }*/
 
 }

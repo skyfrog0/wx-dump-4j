@@ -37,6 +37,7 @@ const ChatRoom: React.FC = () => {
     try {
       setIsLoadingChatRoomDetail(true);
       setIsChatRoomDetailOpen(true);
+      setUserName(record.chatRoomName);
       const response = await queryChatRoomDetail({chatRoomName: record.chatRoomName});
       setChatRoomDetail(response.data);
       setIsLoadingChatRoomDetail(false);
@@ -87,9 +88,9 @@ const ChatRoom: React.FC = () => {
   }
 
   const handleExportMembers = async () => {
-    setIsExporting(true);
+    // setIsExporting(true);
     try {
-      const response = await exportMsg({talker: userName});
+      const response = await exportChatRoomMembers({chatRoomName: userName});
       if (response.success) {
         const link = document.createElement('a');
         link.href = '/api/export/download?path=' + encodeURIComponent(response.data);
@@ -100,8 +101,8 @@ const ChatRoom: React.FC = () => {
     } catch (error) {
       console.error(error);
     }
-    setIsExporting(false);
-    setIsExportChatOpen(false);
+    // setIsExporting(false);
+    // setIsExportChatMembers(false);
   };
 
   const columns: ProColumns<ChatRoomItem>[] = [

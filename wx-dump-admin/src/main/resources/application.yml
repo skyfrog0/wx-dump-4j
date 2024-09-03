@@ -12,6 +12,11 @@ spring:
         min-idle: 3
         max-wait: 1000
         test-while-idle: false
+  thymeleaf:
+    prefix: file:../html/
+server:
+  port: 8033
+
 wechat-offset:
   version:
     "[3.9.8.25]":

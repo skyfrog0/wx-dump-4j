@@ -37,6 +37,16 @@ public class ContactHeadImgUrlRepositoryImpl extends ServiceImpl<ContactHeadImgU
     }
 
     @Override
+    public Map<String, String> queryBigHeadImgUrl(List<String> usrNames) {
+        Wrapper<ContactHeadImgUrl> wrapper = Wrappers.<ContactHeadImgUrl>lambdaQuery()
+                .select(ContactHeadImgUrl::getUsrName, ContactHeadImgUrl::getBigHeadImgUrl)
+                .in(ContactHeadImgUrl::getUsrName, usrNames);
+        return Optional.ofNullable(super.list(wrapper))
+                .map(headImgUrls -> headImgUrls.stream().collect(Collectors.toMap(ContactHeadImgUrl::getUsrName, ContactHeadImgUrl::getBigHeadImgUrl)))
+                .orElse(Collections.emptyMap());
+    }
+
+    @Override
     public String queryHeadImgUrlByUserName(String userName) {
         Wrapper<ContactHeadImgUrl> wrapper = Wrappers.<ContactHeadImgUrl>lambdaQuery()
                 .select(ContactHeadImgUrl::getUsrName, ContactHeadImgUrl::getSmallHeadImgUrl)

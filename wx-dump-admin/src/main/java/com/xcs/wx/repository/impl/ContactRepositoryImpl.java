@@ -103,4 +103,31 @@ public class ContactRepositoryImpl extends ServiceImpl<ContactMapper, Contact> i
     public List<ExportContactVO> exportContact() {
         return getBaseMapper().exportContact();
     }
+
+
+    public List<ExportContactVO> listContacts(List<String> userNames) {
+
+        return getBaseMapper().listContacts(userNames);
+
+        /*// 构建查询条件
+        LambdaQueryWrapper<Contact> wrapper = Wrappers.<Contact>lambdaQuery()
+                .select(Contact::getUserName, Contact::getAlias, Contact::getNickName, Contact::getRemark)
+                .in(Contact::getUserName, userNames);
+        // 查询数据库
+        List<ExportContactVO> contactList = Optional.ofNullable(super.list(wrapper))
+                .map(contacts -> contacts.stream().map(contact -> ContactMapping::convert).collect(Collectors.toList())
+                .orElse(Collections.emptyList());
+
+        return userNames.stream().collect(Collectors.toMap(item -> item, item -> {
+            String nickName = contactList.get(item);
+            // 空校验
+            if (StrUtil.isBlank(nickName)) {
+                return "未知用户";
+            }
+            // 如果备注不为空则取备注，否则取联系人的昵称
+            return nickName;
+        }));*/
+    }
+
+
 }

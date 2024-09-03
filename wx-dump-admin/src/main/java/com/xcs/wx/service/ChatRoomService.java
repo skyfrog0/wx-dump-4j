@@ -2,8 +2,11 @@ package com.xcs.wx.service;
 
 import com.xcs.wx.domain.dto.ChatRoomDTO;
 import com.xcs.wx.domain.vo.ChatRoomDetailVO;
+import com.xcs.wx.domain.vo.ChatRoomMemberVO;
 import com.xcs.wx.domain.vo.ChatRoomVO;
 import com.xcs.wx.domain.vo.PageVO;
+
+import java.util.List;
 
 /**
  * 群聊服务
@@ -30,9 +33,19 @@ public interface ChatRoomService {
     ChatRoomDetailVO queryChatRoomDetail(String chatRoomName);
 
     /**
+     * 查询群成员列表
+     * @param chatRoomName 群聊id
+     * @return
+     */
+    List<ChatRoomMemberVO> queryChatRoomMemberList(String chatRoomName);
+
+    /**
      * 导出群聊
      *
      * @return 群聊excel地址
      */
     String exportChatRoom();
+
+    String exportChatRoomMembers(String chatRoomName);
+
 }

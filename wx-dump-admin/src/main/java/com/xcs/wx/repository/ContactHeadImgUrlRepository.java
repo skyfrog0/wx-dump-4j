@@ -19,6 +19,8 @@ public interface ContactHeadImgUrlRepository {
      */
     Map<String, String> queryHeadImgUrl(List<String> usrNames);
 
+    Map<String, String> queryBigHeadImgUrl(List<String> usrNames);
+
     /**
      * 通过用户名查询联系人头像
      *

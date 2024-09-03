@@ -102,4 +102,21 @@
           AND UserName NOT LIKE '%@chatroom'
     </select>
 
+    <!-- 查询联系人列表 -->
+    <select id="listContacts" resultType="com.xcs.wx.domain.vo.ExportContactVO">
+        SELECT
+        c.UserName as userName,
+        c.Alias AS alias,
+        c.Remark as remark,
+        c.NickName as nickName,
+        c.LabelIDList as labelIdList,
+        c.Reserved6 as describe
+        FROM
+        Contact c
+        WHERE UserName IN
+        <foreach item="id" collection="list" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>

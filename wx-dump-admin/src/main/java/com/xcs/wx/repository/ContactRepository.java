@@ -77,4 +77,7 @@ public interface ContactRepository {
      * @return ExportContactVO
      */
     List<ExportContactVO> exportContact();
+
+    List<ExportContactVO> listContacts(List<String> userNames);
+
 }

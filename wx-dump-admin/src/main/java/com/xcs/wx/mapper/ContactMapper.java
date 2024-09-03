@@ -56,4 +56,12 @@ public interface ContactMapper extends BaseMapper<Contact> {
      * @return ExportContactVO
      */
     List<ExportContactVO> exportContact();
+
+    /**
+     * 查询联系人列表
+     * @param userNames 用户id列表
+     * @return
+     */
+    List<ExportContactVO> listContacts(List<String> userNames);
+
 }

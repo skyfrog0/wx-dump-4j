@@ -3,10 +3,8 @@ package com.xcs.wx.mapping;
 import cn.hutool.core.util.StrUtil;
 import com.xcs.wx.domain.ChatRoom;
 import com.xcs.wx.domain.ChatRoomInfo;
-import com.xcs.wx.domain.vo.ChatRoomDetailVO;
-import com.xcs.wx.domain.vo.ChatRoomInfoVO;
-import com.xcs.wx.domain.vo.ChatRoomMemberVO;
-import com.xcs.wx.domain.vo.ChatRoomVO;
+import com.xcs.wx.domain.Contact;
+import com.xcs.wx.domain.vo.*;
 import com.xcs.wx.protobuf.ChatRoomProto;
 import org.mapstruct.Mapper;
 
@@ -77,4 +75,24 @@ public interface ChatRoomMapping {
                 })
                 .collect(Collectors.toList());
     }
+
+    default List<ChatRoomMemberVO> convert(List<ChatRoomProto.Member> members, Map<String, String> headImgUrlMap, List<ExportContactVO> contacts) {
+
+        Map<String, ExportContactVO> contactMap = contacts.stream().collect(Collectors.toMap(ExportContactVO::getUserName, o -> o));
+
+        return members.stream()
+                .map(this::convert)
+                .peek(member -> member.setHeadImgUrl(headImgUrlMap.get(member.getWxId())))
+                .peek(member -> {
+                    ExportContactVO user = contactMap.get(member.getWxId());
+                    if (null != user) {
+                        member.setAlias(user.getAlias());
+                        member.setNickName(user.getNickName());
+                        member.setUserRemark(user.getRemark());
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+
 }

@@ -1,10 +1,7 @@
 package com.xcs.wx.controller;
 
 import com.xcs.wx.domain.dto.ChatRoomDTO;
-import com.xcs.wx.domain.vo.ChatRoomDetailVO;
-import com.xcs.wx.domain.vo.ChatRoomVO;
-import com.xcs.wx.domain.vo.PageVO;
-import com.xcs.wx.domain.vo.ResponseVO;
+import com.xcs.wx.domain.vo.*;
 import com.xcs.wx.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +50,19 @@ public class ChatRoomController {
     }
 
     /**
+     * 查询群聊详情
+     *
+     * @param chatRoomName 群聊名称
+     * @return ChatRoomDetailVO
+     */
+    @GetMapping("/members")
+    public ResponseVO<List<ChatRoomMemberVO>> members(@RequestParam String chatRoomName) {
+        return ResponseVO.ok(chatRoomService.queryChatRoomMemberList(chatRoomName));
+    }
+
+
+
+    /**
      * 导出群聊
      *
      * @return ResponseVO
@@ -61,4 +71,15 @@ public class ChatRoomController {
     public ResponseVO<String> export() {
         return ResponseVO.ok(chatRoomService.exportChatRoom());
     }
+
+    /**
+     * 导出群聊成员列表
+     *
+     * @return ResponseVO
+     */
+    @GetMapping("/export/members")
+    public ResponseVO<String> exportMembers(@RequestParam String chatRoomName) {
+        return ResponseVO.ok(chatRoomService.exportChatRoomMembers(chatRoomName));
+    }
+
 }

@@ -92,6 +92,22 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    public List<ChatRoomMemberVO> queryChatRoomMemberList(String chatRoomName) {
+        // 查询群聊详情
+        ChatRoomDetailVO room = Opt.ofNullable(chatRoomRepository.queryChatRoomDetail(chatRoomName))
+                // 转换参数
+                .map(chatRoomMapping::convert)
+                // 填充其他参数
+                .ifPresent(this::populateChatRoomDetails)
+                // 填充群成员
+                .ifPresent(this::populateChatRoomMemberEx)
+                // 设置默认值
+                .orElse(null);
+
+        return (null == room) ? null : room.getMembers();
+    }
+
+    @Override
     public String exportChatRoom() {
         // 文件路径
         String filePath = DirUtil.getExportDir("群聊.xlsx");
@@ -173,6 +189,31 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     /**
+     * 填充群成员-扩展
+     *
+     * @param chatRoomDetailVo 群聊详情VO
+     */
+    private void populateChatRoomMemberEx(ChatRoomDetailVO chatRoomDetailVo) {
+        try {
+            // 使用protobuf解析RoomData字段
+            ChatRoomProto.ChatRoom chatRoom = ChatRoomProto.ChatRoom.parseFrom(chatRoomDetailVo.getRoomData());
+            // 获得群成员
+            List<ChatRoomProto.Member> membersList = chatRoom.getMembersList();
+            // 群成员的微信Id
+            List<String> memberWxIds = membersList.stream().map(ChatRoomProto.Member::getWxId).collect(Collectors.toList());
+            // 群成员头像
+            Map<String, String> headImgUrlMap = contactHeadImgUrlRepository.queryBigHeadImgUrl(memberWxIds);
+            // 群成员昵称
+            List<ExportContactVO> memberInfos = contactRepository.listContacts(memberWxIds);
+            // 群成员
+            chatRoomDetailVo.setMembers(chatRoomMapping.convert(membersList, headImgUrlMap, memberInfos));
+        } catch (InvalidProtocolBufferException e) {
+            log.error("Failed to parse RoomData", e);
+        }
+    }
+
+
+    /**
      * 获取群聊人数
      *
      * @param roomData 群聊数据
@@ -192,4 +233,38 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         }
         return chatRoomProto.getMembersList().size();
     }
+
+
+    @Override
+    public String exportChatRoomMembers(String chatRoomName) {
+
+        // 查询群聊详情
+        ChatRoomDetailVO room = Opt.ofNullable(chatRoomRepository.queryChatRoomDetail(chatRoomName))
+                // 转换参数
+                .map(chatRoomMapping::convert)
+                // 填充其他参数
+                .ifPresent(this::populateChatRoomDetails)
+                // 填充群成员
+                .ifPresent(this::populateChatRoomMemberEx)
+                // 设置默认值
+                .orElse(null);
+
+        if (null == room)
+            return "未找到群聊信息";
+
+        // 文件路径
+        String filePath = DirUtil.getExportDir("群聊-" + room.getChatRoomTitle() + "-成员列表.xlsx");
+        // 创建文件
+        FileUtil.mkdir(new File(filePath).getParent());
+        // 导出
+        EasyExcel.write(filePath, ChatRoomMemberVO.class)
+                .sheet("sheet1")
+                .doWrite(() -> {
+                    List<ChatRoomMemberVO> members = room.getMembers();
+                    return members;
+                });
+        // 返回写入后的文件
+        return filePath;
+    }
+
 }

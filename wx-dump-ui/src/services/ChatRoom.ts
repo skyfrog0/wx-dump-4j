@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import { request } from 'umi';
+import {request} from 'umi';
 
 export async function queryChatRoom(params: ChatRoomParams, options?: { [key: string]: any }) {
   return request<Response<ChatRoomItem[]>>('/api/chatroom/list', {
@@ -30,9 +30,19 @@ export async function queryChatRoomDetail(
   });
 }
 
-export async function exportChatRoomDetail(options?: { [key: string]: any }) {
+export async function exportChatRooms(options?: { [key: string]: any }) {
   return request<Response<string>>('/api/chatroom/export', {
     method: 'GET',
+    ...(options || {}),
+  });
+}
+
+export async function exportChatRoomMembers(params: { chatRoomName?: string;}, options?: { [key: string]: any }) {
+  return request<Response<string>>('/api/chatroom/export/members', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
     ...(options || {}),
   });
 }

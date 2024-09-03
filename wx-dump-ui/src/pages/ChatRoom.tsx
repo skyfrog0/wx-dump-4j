@@ -1,14 +1,15 @@
 import {
-  exportChatRoomDetail,
+  exportChatRooms,
   queryChatRoom,
   queryChatRoomDetail,
+  exportChatRoomMembers,
 } from '@/services/ChatRoom';
-import { DownloadOutlined } from '@ant-design/icons';
-import type { ProColumns } from '@ant-design/pro-components';
-import { ProDescriptions, ProTable } from '@ant-design/pro-components';
-import { PageContainer } from '@ant-design/pro-layout';
-import { Avatar, Button, Card, Divider, Flex, List, Modal, Space, Tag, Typography } from 'antd';
-import React, { useState } from 'react';
+import {DownloadOutlined} from '@ant-design/icons';
+import type {ProColumns} from '@ant-design/pro-components';
+import {ProDescriptions, ProTable} from '@ant-design/pro-components';
+import {PageContainer} from '@ant-design/pro-layout';
+import {Avatar, Button, Card, Divider, Flex, List, Modal, Space, Tag, Typography} from 'antd';
+import React, {useState} from 'react';
 import Chat from './Chat';
 import './Style/ChatRoom.less';
 import {exportMsg} from "@/services/Msg";
@@ -24,9 +25,9 @@ const ChatRoom: React.FC = () => {
   const [nickName, setNickName] = useState<string>();
   const [isExportChatOpen, setIsExportChatOpen] = useState(false);
 
-  const { Text } = Typography;
+  const {Text} = Typography;
 
-  const handleChatDetail = (record: ChatRoomItem) => {
+  const handleChatMsg = (record: ChatRoomItem) => {
     setUserName(record.chatRoomName);
     setNickName(record.chatRoomTitle);
     setIsChatDetailOpen(true);
@@ -36,7 +37,7 @@ const ChatRoom: React.FC = () => {
     try {
       setIsLoadingChatRoomDetail(true);
       setIsChatRoomDetailOpen(true);
-      const response = await queryChatRoomDetail({ chatRoomName: record.chatRoomName });
+      const response = await queryChatRoomDetail({chatRoomName: record.chatRoomName});
       setChatRoomDetail(response.data);
       setIsLoadingChatRoomDetail(false);
     } catch (error) {
@@ -47,7 +48,7 @@ const ChatRoom: React.FC = () => {
   const handleExportChatRoom = async () => {
     setIsExporting(true);
     try {
-      const response = await exportChatRoomDetail();
+      const response = await exportChatRooms();
       if (response.success) {
         const link = document.createElement('a');
         link.href = '/api/export/download?path=' + encodeURIComponent(response.data);
@@ -65,7 +66,7 @@ const ChatRoom: React.FC = () => {
   const handleExportChat = async () => {
     setIsExporting(true);
     try {
-      const response = await exportMsg({ talker: userName });
+      const response = await exportMsg({talker: userName});
       if (response.success) {
         const link = document.createElement('a');
         link.href = '/api/export/download?path=' + encodeURIComponent(response.data);
@@ -80,10 +81,28 @@ const ChatRoom: React.FC = () => {
     setIsExportChatOpen(false);
   };
 
-  const handleExportChatOpen = async (record: ChatRoomItem) =>{
+  const handleExportChatOpen = async (record: ChatRoomItem) => {
     setIsExportChatOpen(true);
     setUserName(record.chatRoomName);
   }
+
+  const handleExportMembers = async () => {
+    setIsExporting(true);
+    try {
+      const response = await exportMsg({talker: userName});
+      if (response.success) {
+        const link = document.createElement('a');
+        link.href = '/api/export/download?path=' + encodeURIComponent(response.data);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    setIsExporting(false);
+    setIsExportChatOpen(false);
+  };
 
   const columns: ProColumns<ChatRoomItem>[] = [
     {
@@ -91,7 +110,7 @@ const ChatRoom: React.FC = () => {
       dataIndex: 'headImgUrl',
       align: 'center',
       search: false,
-      render: (_, record) => <Avatar src={record.headImgUrl} shape="circle" size="large" />,
+      render: (_, record) => <Avatar src={record.headImgUrl} shape="circle" size="large"/>,
     },
     {
       dataIndex: 'chatRoomName',
@@ -150,7 +169,7 @@ const ChatRoom: React.FC = () => {
           <Divider type="vertical"/>
           <a key="detail" onClick={() => handleDetail(record)}>群聊详情</a>
           <Divider type="vertical"/>
-          <a key="chat" onClick={() => handleChatDetail(record)}>聊天记录</a>
+          <a key="chat" onClick={() => handleChatMsg(record)}>聊天记录</a>
         </Flex>
       ),
     },
@@ -158,7 +177,7 @@ const ChatRoom: React.FC = () => {
 
   return (
     <PageContainer>
-    <ProTable<ChatRoomItem>
+      <ProTable<ChatRoomItem>
         columns={columns}
         cardBordered={{
           search: true,
@@ -186,7 +205,7 @@ const ChatRoom: React.FC = () => {
         toolBarRender={() => [
           <Button
             key="button"
-            icon={<DownloadOutlined />}
+            icon={<DownloadOutlined/>}
             type="primary"
             onClick={() => setIsChatRoomExportOpen(true)}
           >
@@ -205,10 +224,10 @@ const ChatRoom: React.FC = () => {
           loading={isLoadingChatRoomDetail}
           dataSource={chatRoomDetail}
         >
-          <ProDescriptions.Item dataIndex="chatRoomName" label="群号" />
-          <ProDescriptions.Item dataIndex="chatRoomTitle" label="群名称" />
-          <ProDescriptions.Item dataIndex="selfDisplayName" label="群备注" />
-          <ProDescriptions.Item dataIndex="createBy" label="创建人" />
+          <ProDescriptions.Item dataIndex="chatRoomName" label="群号"/>
+          <ProDescriptions.Item dataIndex="chatRoomTitle" label="群名称"/>
+          <ProDescriptions.Item dataIndex="selfDisplayName" label="群备注"/>
+          <ProDescriptions.Item dataIndex="createBy" label="创建人"/>
           <ProDescriptions.Item
             dataIndex={['chatRoomInfo', 'announcementPublisher']}
             label="公告发布人"
@@ -217,21 +236,32 @@ const ChatRoom: React.FC = () => {
             dataIndex={['chatRoomInfo', 'strAnnouncementPublishTime']}
             label="公告发布时间"
           />
-          <ProDescriptions.Item dataIndex={['chatRoomInfo', 'announcement']} label="群公告内容" />
+          <ProDescriptions.Item dataIndex={['chatRoomInfo', 'announcement']} label="群公告内容"/>
         </ProDescriptions>
+
+        <Flex justify="right" style={{margin:"10px"}}>
+          <Button
+            key="button"
+            icon={<DownloadOutlined/>}
+            type="primary"
+            onClick={() => handleExportMembers()}
+          >
+            导出群成员列表
+          </Button>
+        </Flex>
 
         <Card title="群成员列表">
           <List
-            grid={{ gutter: 16, column: 10 }}
+            grid={{gutter: 16, column: 10}}
             dataSource={chatRoomDetail?.members}
             renderItem={(item) => (
               <List.Item key={item.wxId}>
                 <Flex vertical align="center" justify="center">
                   <Flex>
-                    <Avatar src={item.headImgUrl} />
+                    <Avatar src={item.headImgUrl}/>
                   </Flex>
                   <Flex className="remark-top-margin" justify="center">
-                    <Text ellipsis={{ tooltip: item.remark }}>{item.remark}</Text>
+                    <Text ellipsis={{tooltip: item.remark}}>{item.remark}</Text>
                   </Flex>
                 </Flex>
               </List.Item>
@@ -246,7 +276,7 @@ const ChatRoom: React.FC = () => {
         open={isChatDetailOpen}
         onCancel={() => setIsChatDetailOpen(false)}
       >
-        <Chat userName={userName} />
+        <Chat userName={userName}/>
       </Modal>
       <Modal
         title="导出群聊"
@@ -254,7 +284,7 @@ const ChatRoom: React.FC = () => {
         footer={null}
         onCancel={() => setIsChatRoomExportOpen(false)}
       >
-        <p style={{ padding: '15px' }}>
+        <p style={{padding: '15px'}}>
           即将导出的微信群聊列表数据，请导出后妥善保管，以防信息泄露或丢失！
         </p>
         <Flex justify="flex-end">
@@ -279,7 +309,7 @@ const ChatRoom: React.FC = () => {
         footer={null}
         onCancel={() => setIsExportChatOpen(false)}
       >
-        <p style={{ padding: '15px' }}>
+        <p style={{padding: '15px'}}>
           即将导出的微信聊天记录数据，请导出后妥善保管，以防信息泄露或丢失！
         </p>
         <Flex justify="flex-end">
